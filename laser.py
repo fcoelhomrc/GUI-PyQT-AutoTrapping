@@ -97,8 +97,9 @@ class mwLaser():
         self.port.write(b)
     
     def reset(self):
-        self.port = serial.Serial(output) # Open serial port which is connected to the device
-        self.port.baudrate = 57600
+        if self.port.isOpen() == False:
+            self.port = serial.Serial(output) # Open serial port which is connected to the device
+            self.port.baudrate = 57600
         time.sleep(0.100)
         b=b"\x0F\x11\xFF\x03\x40\x14\x00\x67\xF0"
         self.port.write(b)
@@ -108,6 +109,8 @@ class mwLaser():
         time.sleep(0.100)
         b=b"\x0F\x11\xFF\x03\x40\x13\x00\x66\xF0"
         self.port.write(b)
+        if self.port.isOpen() == True:
+            self.port.close()
     
     def close_port(self):
         self.port.close()
