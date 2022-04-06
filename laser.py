@@ -4,6 +4,7 @@ import os
 
 stream = os.popen('powershell -command "[System.IO.Ports.SerialPort]::getportnames()"')
 output = stream.read()[:-1] #return output of used usb, if no others are connected
+output='COM4'
 
 class mwLaser():
     
@@ -106,7 +107,7 @@ class mwLaser():
         
     def hibernate(self):
         self.disable()
-        time.sleep(0.100)
+        time.sleep(0.200)
         b=b"\x0F\x11\xFF\x03\x40\x13\x00\x66\xF0"
         self.port.write(b)
         if self.port.isOpen() == True:
