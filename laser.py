@@ -16,6 +16,7 @@ class mwLaser():
         self.current = 0
         self.power = 0
         self.TEC_temperature = 0
+        self.TEC_current = 0
         self.status='Ready'
         self.laser_status()
     
@@ -36,6 +37,8 @@ class mwLaser():
             statuse='Ready'
         if dig in [67,69,29]:
             statuse='Configuring'
+        else:
+            pass
         
         self.status=statuse
         
@@ -57,6 +60,12 @@ class mwLaser():
         time.sleep(0.200)
         self.TEC_temperature=self.port.read_all()[-3]/10
     
+    def update_TEC_current(self):
+        b=b"\x0F\x11\xFF\x03\x80\xA5\x00\x38\xF0"
+        self.port.write(b)
+        time.sleep(0.200)
+        self.TEC_current=7600*(self.port.read_all()[-3]*(2.5/2**10)-1.25)/100
+    
     def set_TEC_temperature(self,x):
         h1=hex(x)[2:]
         h2=hex(246-(200-x))[2:]
@@ -69,8 +78,9 @@ class mwLaser():
         self.update_current()
         self.update_power()
         self.update_TEC_temperature()
+        self.update_TEC_current()
         self.laser_status()
-        return [self.current,self.power,self.TEC_temperature,self.status]
+        return [self.current,self.power,self.TEC_temperature,self.TEC_current,self.status]
         
     def set_current(self,x):
         if x<=197:
