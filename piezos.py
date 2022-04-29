@@ -74,7 +74,7 @@ class KPA():
         self.device.EnableDevice()
         time.sleep(0.5)
         
-        self.device.SetOperatingMode(PositionAlignerStatus.OperatingModes.OpenLoop, False)
+        self.device.SetOperatingMode(PositionAlignerStatus.OperatingModes.Monitor, False)
         
         info = self.device.GetDeviceInfo()
         
