@@ -19,7 +19,6 @@ class Worker(QObject):
         
     def update(self):
         while self.flag:
-            t1=time.perf_counter() 
             #time.sleep(0.1)
             item=self.q.get()
             if item=='enable':
@@ -40,9 +39,6 @@ class Worker(QObject):
                 self.data.emit(data)
             
             self.q.task_done()
-            t2=time.perf_counter()
-            print('Task Done for ' + str(item) + ' ' + str(t2-t1))
-            print('Queue length: ' + str(self.q.qsize()))
             #self.q.put('update')
         self.finished.emit()
     
