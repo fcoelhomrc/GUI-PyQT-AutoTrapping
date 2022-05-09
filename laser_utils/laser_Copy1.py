@@ -1,15 +1,13 @@
 import serial
 import time
 import os
-
-stream = os.popen('powershell -command "[System.IO.Ports.SerialPort]::getportnames()"')
-output = stream.read()[:-1] #return output of used usb, if no others are connected
-output='COM3'
+from laser_utils.laser_port_finder import port_finder
 
 class mwLaser():
     
     def __init__(self):
         super().__init__()
+        output=port_finder()
         
         self.port = serial.Serial(output,timeout=0.15) # Open serial port which is connected to the device
         self.port.baudrate = 57600
