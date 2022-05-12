@@ -7,7 +7,7 @@ class DAQ():
     
     def __init__(self):
         super().__init__()
-         
+        
         self.task = nidaqmx.Task()
         #device = "Dev1"
         self.device = 'OTKB' #requires initialization in NI MAX
