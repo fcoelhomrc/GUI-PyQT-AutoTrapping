@@ -46,20 +46,25 @@ from Thorlabs.MotionControl.GenericPiezoCLI.Settings import *
 from Thorlabs.MotionControl.KCube.PositionAlignerCLI import KCubePositionAligner
 from Thorlabs.MotionControl.KCube.PositionAlignerCLI import * 
 
-class KPA():
+class KPZ():
+    
+    """
+    Builds a K-Cube Piezo device instance for control
+    """
     
     def __init__(self, serial_number):
-        #initializes from a serial number
+        #serial number
         self.serial_number = str(serial_number)
+        
+        #builds the list of devices
         DeviceManagerCLI.BuildDeviceList()
         
-        #initializes the device
-        self.device = KCubePositionAligner.CreateKCubePositionAligner(self.serial_number)
+        #creates a device
+        self.device = KCubePiezo.CreateKCubePiezo(self.serial_number)
         
-        #initializes the connected state
+        #connection status
         self.connected = False
-        
-        
+
     def connect(self):
         #initialize communication
         
@@ -74,26 +79,39 @@ class KPA():
         self.device.EnableDevice()
         time.sleep(0.5)
         
-        self.device.SetOperatingMode(PositionAlignerStatus.OperatingModes.Monitor, False)
-        
+        config = self.device.GetPiezoConfiguration(self.serial_number)
         info = self.device.GetDeviceInfo()
+        maxVolts = self.device.GetMaxOutputVoltage()
+        self.max_v =  Decimal.ToDouble(maxVolts)
         
-        print(info)
+        print(f"Device {self.serial_number} has been connected!")
+        return config, info, self.max_v
         
         
+    
+    def disable(self):
+        self.device.DisableDevice()
         
     def close(self):
         
         if not self.connected:
-            print(f"Not closing KPA device {self.serial_number}, it's not open!")
+            print(f"Not closing piezo device {self.serial_number}, it's not open!")
             return
         
         self.device.StopPolling()
         self.device.Disconnect(True)
+        print(f"Disconnected device {self.serial_number}")
+
+    def set_output_voltages(self, voltage):
         
-    def get_position(self):
-        status = self.device.Status
-        time.sleep(0.25)
-        read_x,read_y = status.PositionDifference.X, self.device.Status.PositionDifference.Y
-        read_sum = status.Sum
-        return read_x,read_y,read_sum
+        if voltage > 0 and voltage<self.max_v:
+            #print(self.max_v)
+            # print(Decimal(voltage))
+            i = self.device.SetOutputVoltage(Decimal(voltage))
+            print(i)
+        else:
+            print('Invalid Voltage')
+            
+    def get_output_voltages(self):
+        """Retrieve the output voltages as a list of floating-point numbers"""
+        return Decimal.ToDouble(self.device.GetOutputVoltage())
