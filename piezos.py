@@ -106,12 +106,64 @@ class KPZ():
         
         if voltage > 0 and voltage<self.max_v:
             #print(self.max_v)
-            # print(Decimal(voltage))
+            # print("edcima", Decimal(voltage))
             i = self.device.SetOutputVoltage(Decimal(voltage))
-            print(i)
+            # print(f"{i} sdnjkfhk")
         else:
             print('Invalid Voltage')
             
     def get_output_voltages(self):
         """Retrieve the output voltages as a list of floating-point numbers"""
         return Decimal.ToDouble(self.device.GetOutputVoltage())
+    
+class KPA():
+    
+    def __init__(self, serial_number):
+        #initializes from a serial number
+        self.serial_number = str(serial_number)
+        DeviceManagerCLI.BuildDeviceList()
+        
+        #initializes the device
+        self.device = KCubePositionAligner.CreateKCubePositionAligner(self.serial_number)
+        
+        #initializes the connected state
+        self.connected = False
+        
+        
+    def connect(self):
+        #initialize communication
+        
+        #connect if not connected
+        assert not self.connected
+        self.device.Connect(self.serial_number)
+        self.connected = True
+        
+        self.device.WaitForSettingsInitialized(5000)
+        self.device.StartPolling(250)
+        time.sleep(0.5)
+        self.device.EnableDevice()
+        time.sleep(0.5)
+        
+        self.device.SetOperatingMode(PositionAlignerStatus.OperatingModes.Monitor, False)
+        
+        info = self.device.GetDeviceInfo()
+        
+        print(info)
+        
+        
+        
+    def close(self):
+        
+        if not self.connected:
+            print(f"Not closing KPA device {self.serial_number}, it's not open!")
+            return
+        
+        self.device.StopPolling()
+        self.device.Disconnect(True)
+        
+    def get_position(self):
+        status = self.device.Status
+        time.sleep(0.25)
+        read_x,read_y = status.PositionDifference.X, self.device.Status.PositionDifference.Y
+        read_sum = status.Sum
+        return read_x,read_y,read_sum
